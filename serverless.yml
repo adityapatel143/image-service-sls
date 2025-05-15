@@ -1,4 +1,4 @@
-service: python-crud-demo
+service: instagram-image-service
 
 frameworkVersion: '3'
 

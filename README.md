@@ -11,6 +11,21 @@ This service provides a scalable solution for uploading, storing, and retrieving
 - **Comprehensive API:** Endpoints for uploading, retrieving, updating, and deleting images
 - **Access Control:** Support for public/private visibility settings
 
+## Project Structure
+
+```
+docker-compose.yml       # Docker configuration for LocalStack
+localstack-endpoints.json # LocalStack endpoint configuration
+package.json             # Node.js package configuration
+README.md                # This file
+requirements.txt         # Python dependencies
+serverless.yml           # Serverless Framework configuration
+app/
+  image_handler.py       # Image processing logic
+  image_schema.py        # Data validation schemas
+  s3_handler.py          # S3 interaction logic
+```
+
 ## Architecture
 
 The service is built using the following AWS services:
@@ -80,25 +95,45 @@ Content-Type: application/json
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) (for Serverless Framework)
+- [Python](https://www.python.org/) (3.8 or higher)
 - [Docker](https://www.docker.com/) (for local dependencies)
 - [LocalStack](https://localstack.cloud/) (for local AWS emulation)
 
 ### Local Development
 
-1. Install dependencies:
+1. Create a Python virtual environment:
 
 ```bash
-npm install
+python -m venv .venv
+```
+
+2. Activate the Python Environment (Windows):
+
+```bash
+source .venv/Scripts/activate
+```
+
+3. Install Python dependencies:
+
+```bash
 pip install -r requirements.txt
 ```
 
-2. Start LocalStack:
+4. Initialize Node.js project and install Serverless Framework:
 
 ```bash
-docker-compose up -d
+npm init --y
+npm install -g serverless@3
+npm install -D serverless-localstack serverless-python-requirements
 ```
 
-3. Deploy to LocalStack:
+5. Start LocalStack:
+
+```bash
+docker compose up -d
+```
+
+6. Deploy to LocalStack:
 
 ```bash
 serverless deploy --stage local
