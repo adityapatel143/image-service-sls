@@ -1,0 +1,8 @@
+# filepath: d:\instagram\requirements.txt
+boto3==1.38.15
+localstack-client==2.10
+jsonschema==4.23.0
+python-multipart==0.0.7
+pillow==11.2.1
+requests==2.32.3
+
