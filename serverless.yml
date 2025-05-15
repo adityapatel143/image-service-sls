@@ -8,7 +8,6 @@ provider:
   stage: dev
   region: us-east-1
   environment:
-    DYNAMODB_TABLE: ${self:service}-${sls:stage}
     IMAGES_TABLE: ${self:service}-images-${sls:stage}
     S3_BUCKET: ${self:service}-files-${sls:stage}
   iam:
@@ -18,7 +17,6 @@ provider:
           Action:
             - dynamodb:*
           Resource: 
-            - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
             - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}"
         - Effect: Allow
           Action:
@@ -44,31 +42,6 @@ custom:
     dockerizePip: true
 
 functions:
-  api:
-    handler: app.handler.router
-    events:
-      - http:
-          path: items
-          method: post
-      - http:
-          path: items/{id}
-          method: get
-      - http:
-          path: items
-          method: get  
-      - http:
-          path: items/{id}
-          method: put
-      - http:
-          path: items/{id}
-          method: delete
-  
-  fileUpload:
-    handler: app.file_upload_handler.upload_file_handler
-    events:
-      - http:
-          path: upload
-          method: post
   
   # Image API functions
   imageUpload:
@@ -116,18 +89,6 @@ functions:
 
 resources:
   Resources:
-    ItemsDynamoDbTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:provider.environment.DYNAMODB_TABLE}
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-        BillingMode: PAY_PER_REQUEST
-    
     ImagesDynamoDbTable:
       Type: AWS::DynamoDB::Table
       Properties:
