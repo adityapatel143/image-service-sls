@@ -44,9 +44,27 @@ The service is built using the following AWS services:
 - `POST /images/upload` - Upload a new image with metadata
 - `GET /images` - List images with advanced filtering options
 - `GET /images/{id}` - Get a single image's metadata
+- `GET /images/{id}/download` - Download an image by ID with various output options
 - `PUT /images/{id}` - Update image metadata
 - `DELETE /images/{id}` - Delete an image and its metadata
 
+
+## Image Download
+
+The `/images/{id}/download` endpoint allows downloading images by their ID using different methods:
+
+### Query Parameters
+
+- `type` (optional) - The download method to use. Available options:
+  - `redirect` (default) - Generates a pre-signed URL and redirects to it
+  - `binary` - Returns the image as binary data in the response
+  - `base64` - Returns the image as a base64-encoded string in a JSON response
+
+### Examples
+
+- Direct download with browser redirect: `GET /images/{id}/download`
+- Download as binary for programmatic access: `GET /images/{id}/download?type=binary`
+- Get base64-encoded data: `GET /images/{id}/download?type=base64`
 
 ## Image Listing with Filtering
 
@@ -63,7 +81,6 @@ The image listing API (`GET /images`) supports multiple filtering options to hel
 | sort       | Sort by field (createdAt, filename)                   | `?sort=filename`         |
 | order      | Sort order (asc, desc)                                | `?order=asc`             |
 | limit      | Limit results (max: 100)                              | `?limit=20`              |
-| nextToken  | Pagination token for next page                        | `?nextToken=eyJpZC4uLn0=`|
 
 ### Example Queries:
 

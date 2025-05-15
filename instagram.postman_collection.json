@@ -1,0 +1,199 @@
+{
+	"info": {
+		"_postman_id": "cf6736dc-89d8-4d8f-a95f-8e0e51d72090",
+		"name": "instagram",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10595856"
+	},
+	"item": [
+		{
+			"name": "upload images",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/Users/ADMIN/Downloads/test.jpg"
+						},
+						{
+							"key": "userId",
+							"value": "3",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:4566/_aws/execute-api/{{api_id}}/local/images/upload",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4566",
+					"path": [
+						"_aws",
+						"execute-api",
+						"{{api_id}}",
+						"local",
+						"images",
+						"upload"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get images",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:4566/_aws/execute-api/{{api_id}}/local/images",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4566",
+					"path": [
+						"_aws",
+						"execute-api",
+						"{{api_id}}",
+						"local",
+						"images"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search image",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:4566/_aws/execute-api/{{api_id}}/local/images?filename=test",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4566",
+					"path": [
+						"_aws",
+						"execute-api",
+						"{{api_id}}",
+						"local",
+						"images"
+					],
+					"query": [
+						{
+							"key": "filename",
+							"value": "test"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get single",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Foo\",\r\n    \"id\": 100\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4566/_aws/execute-api/{{api_id}}/local/images/c0e8eb57-ebde-4725-9bf2-002a161f26b4",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4566",
+					"path": [
+						"_aws",
+						"execute-api",
+						"{{api_id}}",
+						"local",
+						"images",
+						"c0e8eb57-ebde-4725-9bf2-002a161f26b4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete Image",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Foo\",\r\n    \"id\": 100\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4566/_aws/execute-api/{{api_id}}/local/images/c0e8eb57-ebde-4725-9bf2-002a161f26b4",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4566",
+					"path": [
+						"_aws",
+						"execute-api",
+						"{{api_id}}",
+						"local",
+						"images",
+						"c0e8eb57-ebde-4725-9bf2-002a161f26b4"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "api_id",
+			"value": "q7q0c4sr9n",
+			"type": "string"
+		}
+	]
+}
