@@ -461,7 +461,19 @@ def parse_multipart_form(body, content_type):
 
 def get_images(event, context):
     """
-    List images with optional filtering by userId or tags
+    List images with filtering options
+    
+    Supported filters:
+    - userId: Filter by user ID
+    - tag: Filter by tag
+    - visibility: Filter by visibility level (public, private, friends)
+    - filename: Filter by filename (partial match)
+    - dateFrom: Filter by upload date (from)
+    - dateTo: Filter by upload date (to)
+    - sort: Sort by field (createdAt, filename)
+    - order: Sort order (asc, desc)
+    - limit: Limit results
+    - nextToken: Pagination token
     
     Args:
         event: HTTP event
@@ -483,40 +495,112 @@ def get_images(event, context):
         user_id = query_params.get('userId')
         tag = query_params.get('tag')
         visibility = query_params.get('visibility', 'public')
+        filename = query_params.get('filename')
+        date_from = query_params.get('dateFrom')
+        date_to = query_params.get('dateTo')
+        sort_by = query_params.get('sort', 'createdAt')
+        sort_order = query_params.get('order', 'desc').lower()
+        limit = int(query_params.get('limit', 10))
+        next_token = query_params.get('nextToken')
         
-        # Build the scan parameters
-        scan_params = {}
-        
-        # If userId is provided, filter by it
-        if user_id:
-            scan_params['FilterExpression'] = "userId = :userId"
-            scan_params['ExpressionAttributeValues'] = {':userId': user_id}
+        # Validate parameters
+        if limit < 1 or limit > 100:
+            limit = 10
             
-            # If visibility is also provided
-            if visibility and visibility != 'all':
-                scan_params['FilterExpression'] += " AND visibility = :visibility"
-                scan_params['ExpressionAttributeValues'][':visibility'] = visibility
-        elif visibility and visibility != 'all':
-            # Only filter by visibility if userId is not provided
-            scan_params['FilterExpression'] = "visibility = :visibility"
-            scan_params['ExpressionAttributeValues'] = {':visibility': visibility}
+        if sort_order not in ['asc', 'desc']:
+            sort_order = 'desc'
+            
+        # Build the scan parameters
+        scan_params = {
+            'Limit': limit
+        }
+        
+        # Add pagination token if provided
+        if next_token:
+            try:
+                scan_params['ExclusiveStartKey'] = json.loads(
+                    base64.b64decode(next_token).decode('utf-8')
+                )
+            except Exception as e:
+                logger.error(f"Invalid pagination token: {str(e)}")
+        
+        # Initialize expressions and attribute values
+        filter_expressions = []
+        expression_attribute_values = {}
+        
+        # Filter by userId if provided
+        if user_id:
+            filter_expressions.append("userId = :userId")
+            expression_attribute_values[':userId'] = user_id
+            
+        # Filter by visibility
+        if visibility and visibility != 'all':
+            filter_expressions.append("visibility = :visibility")
+            expression_attribute_values[':visibility'] = visibility
+            
+        # Filter by filename (partial match) if provided
+        if filename:
+            filter_expressions.append("contains(filename, :filename)")
+            expression_attribute_values[':filename'] = filename
+            
+        # Filter by upload date range if provided
+        if date_from:
+            try:
+                # Convert to ISO string for comparison
+                date_from_iso = datetime.fromisoformat(date_from).isoformat()
+                filter_expressions.append("createdAt >= :dateFrom")
+                expression_attribute_values[':dateFrom'] = date_from_iso
+            except ValueError:
+                logger.warning(f"Invalid dateFrom format: {date_from}")
+                
+        if date_to:
+            try:
+                # Convert to ISO string for comparison
+                date_to_iso = datetime.fromisoformat(date_to).isoformat()
+                filter_expressions.append("createdAt <= :dateTo")
+                expression_attribute_values[':dateTo'] = date_to_iso
+            except ValueError:
+                logger.warning(f"Invalid dateTo format: {date_to}")
+        
+        # Combine filter expressions if any
+        if filter_expressions:
+            scan_params['FilterExpression'] = " AND ".join(filter_expressions)
+            scan_params['ExpressionAttributeValues'] = expression_attribute_values
             
         # Execute the query
         response = table.scan(**scan_params)
         items = response.get('Items', [])
         
-        # Filter by tag if provided
+        # Filter by tag if provided (in-memory filter since DynamoDB doesn't support direct array contains)
         if tag and items:
             items = [item for item in items if tag in (item.get('tags', []))]
+            
+        # Sort results
+        if sort_by:
+            reverse = sort_order == 'desc'
+            items = sorted(
+                items, 
+                key=lambda x: x.get(sort_by, ''), 
+                reverse=reverse
+            )
+        
+        # Handle pagination
+        result = {
+            'images': items,
+            'count': len(items)
+        }
+        
+        # Include pagination token if more results available
+        if 'LastEvaluatedKey' in response:
+            result['nextToken'] = base64.b64encode(
+                json.dumps(response['LastEvaluatedKey'], cls=DecimalEncoder).encode('utf-8')
+            ).decode('utf-8')
             
         # Return the results
         return {
             'statusCode': 200,
             'headers': {'Content-Type': 'application/json'},
-            'body': json.dumps({
-                'images': items,
-                'count': len(items)
-            }, cls=DecimalEncoder)
+            'body': json.dumps(result, cls=DecimalEncoder)
         }
         
     except Exception as e:

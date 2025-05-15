@@ -6,6 +6,8 @@ This service provides a scalable solution for uploading, storing, and retrieving
 
 - **Image Upload:** Support for both multipart/form-data and JSON (base64 encoded) upload methods
 - **Metadata Storage:** Automatic storage of image metadata in DynamoDB
+- **Advanced Image Search:** Multiple filtering options including user, tags, filename, date range, and more
+- **Pagination & Sorting:** Support for result pagination and customizable sorting for efficient browsing
 - **Scalability:** Built with AWS Lambda for automatic scaling to handle multiple concurrent users
 - **Image Processing:** Background processing of uploaded images via S3 event triggers
 - **Comprehensive API:** Endpoints for uploading, retrieving, updating, and deleting images
@@ -40,19 +42,47 @@ The service is built using the following AWS services:
 ### Image Management
 
 - `POST /images/upload` - Upload a new image with metadata
-- `GET /images` - List images (with optional filtering by user or tags)
+- `GET /images` - List images with advanced filtering options
 - `GET /images/{id}` - Get a single image's metadata
 - `PUT /images/{id}` - Update image metadata
 - `DELETE /images/{id}` - Delete an image and its metadata
 
-### General API
 
-- `POST /items` - Create a new item
-- `GET /items` - List all items
-- `GET /items/{id}` - Get a single item
-- `PUT /items/{id}` - Update an item
-- `DELETE /items/{id}` - Delete an item
-- `POST /upload` - Legacy file upload endpoint
+## Image Listing with Filtering
+
+The image listing API (`GET /images`) supports multiple filtering options to help you find exactly the images you need:
+
+| Parameter  | Description                                           | Example                  |
+|------------|-------------------------------------------------------|--------------------------|
+| userId     | Filter by user ID                                     | `?userId=user123`        |
+| tag        | Filter by tag                                         | `?tag=vacation`          |
+| visibility | Filter by visibility level (public, private, friends) | `?visibility=public`     |
+| filename   | Filter by partial filename match                      | `?filename=vacation`     |
+| dateFrom   | Filter by upload date (from)                          | `?dateFrom=2023-01-01`   |
+| dateTo     | Filter by upload date (to)                            | `?dateTo=2023-12-31`     |
+| sort       | Sort by field (createdAt, filename)                   | `?sort=filename`         |
+| order      | Sort order (asc, desc)                                | `?order=asc`             |
+| limit      | Limit results (max: 100)                              | `?limit=20`              |
+| nextToken  | Pagination token for next page                        | `?nextToken=eyJpZC4uLn0=`|
+
+### Example Queries:
+
+```
+# Basic query - get public images
+GET /images
+
+# Get images from a specific user
+GET /images?userId=user123
+
+# Search for beach photos uploaded in summer 2023
+GET /images?filename=beach&dateFrom=2023-06-01&dateTo=2023-09-01
+
+# Get the most recently uploaded vacation photos
+GET /images?tag=vacation&sort=createdAt&order=desc&limit=10
+
+# Combined filtering with pagination
+GET /images?userId=user123&visibility=public&limit=5&nextToken=eyJpZC4uLn0=
+```
 
 ## Image Upload Formats
 
